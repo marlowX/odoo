@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Widok formularza -->
+        <record id="view_sellasist_config_form" model="ir.ui.view">
+            <field name="name">sellasist.config.form</field>
+            <field name="model">sellasist.config</field>
+            <field name="arch" type="xml">
+                <form string="Konfiguracja Sellasist">
+                    <header>
+                        <button name="test_connection" string="Test połączenia" 
+                               type="object" class="btn-primary"/>
+                        <button name="action_sync_orders" string="Synchronizuj zamówienia" 
+                               type="object" class="btn-secondary"/>
+                        <button name="update_cron_from_config" string="🔄 Odśwież cron" 
+                               type="object" class="btn-info"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="api_key" password="True"/>
+                            <field name="active"/>
+                        </group>
+                        
+                        <group string="Automatyczna synchronizacja">
+                            <field name="auto_sync_enabled"/>
+                            <field name="auto_sync_hours" invisible="auto_sync_enabled == False"/>
+                            <field name="cron_interval_minutes" invisible="auto_sync_enabled == False"/>
+                            <field name="auto_create_orders" invisible="auto_sync_enabled == False"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Widok listy -->
+        <record id="view_sellasist_config_tree" model="ir.ui.view">
+            <field name="name">sellasist.config.tree</field>
+            <field name="model">sellasist.config</field>
+            <field name="arch" type="xml">
+                <tree string="Konfiguracja Sellasist">
+                    <field name="name"/>
+                    <field name="active"/>
+                    <field name="auto_sync_enabled"/>
+                    <field name="auto_sync_hours"/>
+                    <field name="cron_interval_minutes"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Akcja -->
+        <record id="action_sellasist_config" model="ir.actions.act_window">
+            <field name="name">Sellasist API</field>
+            <field name="res_model">sellasist.config</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!-- Menu w Sprzedaży -->
+        <menuitem id="menu_sellasist_sales" 
+                 name="Sellasist API" 
+                 parent="sale.sale_menu_root" 
+                 action="action_sellasist_config" 
+                 sequence="10"/>
+
+        <!-- Menu w Konfiguracji -->
+        <menuitem id="menu_sellasist_settings" 
+                 name="Sellasist API" 
+                 parent="base.menu_administration" 
+                 action="action_sellasist_config" 
+                 sequence="10"/>
+
+        <!-- Menu główne (backup) -->
+        <menuitem id="menu_sellasist_main" 
+                 name="Sellasist" 
+                 action="action_sellasist_config" 
+                 sequence="15"/>
+    </data>
+</odoo>

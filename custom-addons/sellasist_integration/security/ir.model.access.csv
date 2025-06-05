@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sellasist_config,sellasist.config,model_sellasist_config,base.group_user,1,1,1,1
+access_sellasist_order,sellasist.order,model_sellasist_order,base.group_user,1,1,1,1
+access_sellasist_sync_wizard,sellasist.sync.wizard,model_sellasist_sync_wizard,base.group_user,1,1,1,1
+access_ir_actions_server,ir.actions.server,base.model_ir_actions_server,base.group_user,1,0,0,0

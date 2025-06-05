@@ -1,0 +1,159 @@
+from odoo import models, fields, api
+
+class FurnitureBOM(models.Model):
+    _name = 'furniture.bom'
+    _description = 'Receptura meblarska (BOM)'
+    _rec_name = 'product_tmpl_id'
+    
+    # Produkt końcowy (formatka)
+    product_tmpl_id = fields.Many2one('product.template', string='Produkt (formatka)', required=True, 
+                                     domain="[('furniture_category', '=', 'component')]")
+    product_id = fields.Many2one('product.product', string='Wariant produktu', 
+                                domain="[('product_tmpl_id', '=', product_tmpl_id)]")
+    
+    # Informacje podstawowe
+    code = fields.Char('Kod BOM')
+    sequence = fields.Integer('Kolejność', default=10)
+    type = fields.Selection([
+        ('normal', 'Produkcja'),
+        ('phantom', 'Zestaw (phantom)'),
+    ], string='Typ BOM', default='normal', required=True)
+    
+    # Ilości
+    product_qty = fields.Float('Ilość do wyprodukowania', default=1.0, required=True)
+    product_uom_id = fields.Many2one('uom.uom', string='Jednostka miary', required=True)
+    
+    # Linie BOM (surowce)
+    bom_line_ids = fields.One2many('furniture.bom.line', 'bom_id', string='Składniki')
+    
+    # Obliczenia
+    total_cost = fields.Float('Całkowity koszt', compute='_compute_total_cost', store=True)
+    
+    # Aktywność
+    active = fields.Boolean('Aktywny', default=True)
+    
+    @api.depends('bom_line_ids.subtotal')
+    def _compute_total_cost(self):
+        for bom in self:
+            bom.total_cost = sum(line.subtotal for line in bom.bom_line_ids)
+    
+    @api.model
+    def create_bom_from_formatka(self, formatka_id):
+        """Automatyczne tworzenie BOM na podstawie parametrów formatki"""
+        formatka = self.env['product.template'].browse(formatka_id)
+        if not formatka.czy_formatka:
+            return False
+            
+        # Znajdź odpowiednią płytę surowcową na podstawie koloru i grubości
+        plate_domain = [
+            ('furniture_category', '=', 'raw_material'),
+            ('grubosc', '=', formatka.grubosc)
+        ]
+        if formatka.kolor_plyty_id:
+            plate_domain.append(('kolor_plyty_id', '=', formatka.kolor_plyty_id.id))
+        
+        plate = self.env['product.template'].search(plate_domain, limit=1)
+        
+        vals = {
+            'product_tmpl_id': formatka.id,
+            'code': f"BOM-{formatka.nazwa_gen or formatka.name}",
+            'product_qty': 1.0,
+            'product_uom_id': self.env.ref('uom.product_uom_unit').id,
+        }
+        
+        bom = self.create(vals)
+        
+        # Dodaj linię dla płyty
+        if plate:
+            area_needed = (formatka.dlugosc * formatka.szerokosc) / 1000000  # mm² na m²
+            
+            self.env['furniture.bom.line'].create({
+                'bom_id': bom.id,
+                'product_tmpl_id': plate.id,
+                'product_qty': area_needed,
+                'product_uom_id': self.env.ref('uom.product_uom_meter').id,  # m²
+            })
+        
+        # Dodaj linie dla oklein (jeśli potrzebne)
+        if formatka.oklejanie:
+            perimeter = 2 * (formatka.dlugosc + formatka.szerokosc) / 1000  # mm na m
+            
+            # Dla każdej okleiny
+            for okleina_field in ['okleina1_id', 'okleina2_id', 'okleina3_id', 'okleina4_id']:
+                okleina = getattr(formatka, okleina_field)
+                if okleina:
+                    # Znajdź odpowiednie obrzeże
+                    edge_domain = [
+                        ('furniture_category', '=', 'edge_material'),
+                        ('name', 'ilike', okleina.code)
+                    ]
+                    edge = self.env['product.template'].search(edge_domain, limit=1)
+                    
+                    if edge:
+                        self.env['furniture.bom.line'].create({
+                            'bom_id': bom.id,
+                            'product_tmpl_id': edge.id,
+                            'product_qty': perimeter / 4,  # Zakładamy 4 krawędzie
+                            'product_uom_id': self.env.ref('uom.product_uom_meter').id,  # mb
+                        })
+        
+        return bom
+
+class FurnitureBOMLine(models.Model):
+    _name = 'furniture.bom.line'
+    _description = 'Linia BOM - składnik'
+    _rec_name = 'product_tmpl_id'
+    
+    # Powiązania
+    bom_id = fields.Many2one('furniture.bom', string='BOM', required=True, ondelete='cascade')
+    sequence = fields.Integer('Kolejność', default=10)
+    
+    # Produkt składnik (surowiec)
+    product_tmpl_id = fields.Many2one('product.template', string='Surowiec', required=True,
+                                     domain="[('furniture_category', 'in', ['raw_material', 'edge_material'])]")
+    product_id = fields.Many2one('product.product', string='Wariant surowca',
+                                domain="[('product_tmpl_id', '=', product_tmpl_id)]")
+    
+    # Ilości
+    product_qty = fields.Float('Ilość potrzebna', required=True, default=1.0)
+    product_uom_id = fields.Many2one('uom.uom', string='Jednostka miary', required=True)
+    
+    # Koszty
+    product_cost = fields.Float('Koszt jednostkowy', related='product_tmpl_id.standard_price', readonly=True)
+    subtotal = fields.Float('Koszt całkowity', compute='_compute_subtotal', store=True)
+    
+    # Dodatkowe informacje
+    operation_id = fields.Many2one('furniture.operation', string='Operacja')
+    notes = fields.Text('Uwagi')
+    
+    @api.depends('product_qty', 'product_cost')
+    def _compute_subtotal(self):
+        for line in self:
+            line.subtotal = line.product_qty * line.product_cost
+
+class FurnitureOperation(models.Model):
+    _name = 'furniture.operation'
+    _description = 'Operacje produkcyjne'
+    
+    name = fields.Char('Nazwa operacji', required=True)
+    code = fields.Char('Kod operacji')
+    operation_type = fields.Selection([
+        ('cutting', 'Cięcie'),
+        ('drilling', 'Wiercenie'),
+        ('edging', 'Oklejanie'),
+        ('assembly', 'Montaż'),
+        ('finishing', 'Wykończenie'),
+    ], string='Typ operacji')
+    
+    # Parametry czasowe
+    setup_time = fields.Float('Czas przygotowania (min)')
+    time_per_unit = fields.Float('Czas na jednostkę (min)')
+    
+    # Koszty
+    cost_per_hour = fields.Float('Koszt za godzinę')
+    
+    # Maszyna/stanowisko
+    workcenter_id = fields.Char('Stanowisko pracy')
+    
+    description = fields.Text('Opis operacji')
+    active = fields.Boolean('Aktywny', default=True)

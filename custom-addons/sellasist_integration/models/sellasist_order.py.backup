@@ -1,0 +1,701 @@
+from odoo import models, fields, api
+import logging
+import requests
+from datetime import datetime, timedelta
+import json
+import time
+
+_logger = logging.getLogger(__name__)
+
+class SellasistOrder(models.Model):
+    _name = 'sellasist.order'
+    _description = 'Zamówienie Sellasist'
+    _rec_name = 'sellasist_id'
+    _order = 'date desc'
+
+    # Podstawowe informacje
+    sellasist_id = fields.Char('ID Sellasist', required=True, index=True)
+    is_copied = fields.Boolean('Skopiowane')
+    creator = fields.Char('Twórca')
+    date = fields.Datetime('Data zamówienia')
+    order_master = fields.Char('Zamówienie główne')
+    last_status_change = fields.Datetime('Ostatnia zmiana statusu')
+    
+    # Status
+    status_id = fields.Char('ID statusu')
+    status_name = fields.Char('Nazwa statusu')
+    
+    # Wysyłka
+    shipment_id = fields.Char('ID wysyłki')
+    shipment_name = fields.Char('Nazwa wysyłki')
+    shipment_total = fields.Float('Koszt wysyłki')
+    shipment_pickup_point = fields.Char('Punkt odbioru')
+    shipment_pickup_code = fields.Char('Kod punktu odbioru')
+    delivery_date = fields.Date('Data dostawy')
+    shipment_internal_name = fields.Char('Wewnętrzna nazwa wysyłki')
+    
+    # Płatność
+    payment_id = fields.Char('ID płatności')
+    payment_name = fields.Char('Nazwa płatności')
+    payment_paid = fields.Float('Zapłacona kwota')
+    payment_paid_date = fields.Datetime('Data płatności')
+    payment_cod = fields.Boolean('Pobranie')
+    payment_status = fields.Char('Status płatności')
+    payment_currency = fields.Char('Waluta')
+    payment_tax = fields.Float('Podatek')
+    
+    # Dodatkowe pola
+    placeholder = fields.Boolean('Placeholder')
+    important = fields.Boolean('Ważne')
+    deadline = fields.Date('Termin')
+    source = fields.Char('Źródło')
+    shop = fields.Char('Sklep')
+    tracking_number = fields.Char('Numer śledzenia')
+    document_number = fields.Char('Numer dokumentu')
+    invoice = fields.Boolean('Faktura')
+    email = fields.Char('Email')
+    total = fields.Float('Wartość całkowita')
+    comment = fields.Text('Komentarz')
+    
+    # Dane zewnętrzne
+    external_id = fields.Char('ID zewnętrzne')
+    external_login = fields.Char('Login zewnętrzny')
+    external_user_id = fields.Char('ID użytkownika zewnętrznego')
+    external_account = fields.Char('Konto zewnętrzne')
+    external_account_name = fields.Char('Nazwa konta zewnętrznego')
+    external_shipment_name = fields.Char('Nazwa wysyłki zewnętrznej')
+    external_payment_name = fields.Char('Nazwa płatności zewnętrznej')
+    external_number_of_packages = fields.Char('Liczba paczek')
+    external_smart = fields.Char('Smart zewnętrzne')
+    external_type = fields.Char('Typ zewnętrzny')
+    
+    # Adresy - rachunek
+    bill_name = fields.Char('Imię (rachunek)')
+    bill_surname = fields.Char('Nazwisko (rachunek)')
+    bill_street = fields.Char('Ulica (rachunek)')
+    bill_home_number = fields.Char('Numer domu (rachunek)')
+    bill_flat_number = fields.Char('Numer mieszkania (rachunek)')
+    bill_description = fields.Text('Opis (rachunek)')
+    bill_postcode = fields.Char('Kod pocztowy (rachunek)')
+    bill_city = fields.Char('Miasto (rachunek)')
+    bill_state = fields.Char('Województwo (rachunek)')
+    bill_phone = fields.Char('Telefon (rachunek)')
+    bill_company_name = fields.Char('Nazwa firmy (rachunek)')
+    bill_company_nip = fields.Char('NIP (rachunek)')
+    bill_country_id = fields.Char('ID kraju (rachunek)')
+    bill_country_name = fields.Char('Nazwa kraju (rachunek)')
+    bill_country_code = fields.Char('Kod kraju (rachunek)')
+    
+    # Adresy - wysyłka
+    ship_name = fields.Char('Imię (wysyłka)')
+    ship_surname = fields.Char('Nazwisko (wysyłka)')
+    ship_street = fields.Char('Ulica (wysyłka)')
+    ship_home_number = fields.Char('Numer domu (wysyłka)')
+    ship_flat_number = fields.Char('Numer mieszkania (wysyłka)')
+    ship_description = fields.Text('Opis (wysyłka)')
+    ship_postcode = fields.Char('Kod pocztowy (wysyłka)')
+    ship_city = fields.Char('Miasto (wysyłka)')
+    ship_state = fields.Char('Województwo (wysyłka)')
+    ship_phone = fields.Char('Telefon (wysyłka)')
+    ship_company_name = fields.Char('Nazwa firmy (wysyłka)')
+    ship_company_nip = fields.Char('NIP (wysyłka)')
+    ship_country_id = fields.Char('ID kraju (wysyłka)')
+    ship_country_name = fields.Char('Nazwa kraju (wysyłka)')
+    ship_country_code = fields.Char('Kod kraju (wysyłka)')
+    
+    # Punkt odbioru
+    pickup_code = fields.Char('Kod punktu odbioru')
+    pickup_type = fields.Char('Typ punktu odbioru')
+    pickup_address = fields.Text('Adres punktu odbioru')
+    
+    # Pola JSON dla złożonych danych
+    raw_data = fields.Text('Surowe dane JSON')
+    carts_data = fields.Text('Dane koszyków')
+    payments_data = fields.Text('Dane płatności')
+    additional_fields_data = fields.Text('Dodatkowe pola')
+    notes_data = fields.Text('Notatki')
+    
+    # Powiązania z Odoo
+    sale_order_id = fields.Many2one('sale.order', 'Zamówienie sprzedaży')
+    partner_id = fields.Many2one('res.partner', 'Klient')
+    account_move_id = fields.Many2one('account.move', 'Faktura/Paragon')
+    
+    # Status synchronizacji
+    sync_status = fields.Selection([
+        ('new', 'Nowe'),
+        ('synced', 'Zsynchronizowane'),
+        ('error', 'Błąd'),
+    ], string='Status synchronizacji', default='new')
+    synced = fields.Boolean('Zsynchronizowane', default=False)
+    sync_error = fields.Text('Błąd synchronizacji')
+    last_sync = fields.Datetime('Ostatnia synchronizacja')
+
+    @api.model
+    def sync_orders_from_sellasist(self, hours_back=24):
+        """Synchronizuj zamówienia z Sellasist - uproszczona wersja bez paginacji"""
+        config = self.env['sellasist.config'].search([('active', '=', True)], limit=1)
+        if not config:
+            _logger.error("Brak aktywnej konfiguracji Sellasist")
+            return False
+            
+        try:
+            # Przygotuj daty
+            date_to = datetime.now()
+            date_from = date_to - timedelta(hours=hours_back)
+            
+            # Pobierz logi zamówień - JEDNA PORCJA
+            headers = {
+                'accept': 'application/json',
+                'apiKey': config.api_key
+            }
+            
+            params = {
+                'date_from': date_from.strftime('%Y-%m-%d %H:%M:%S'),
+                'date_to': date_to.strftime('%Y-%m-%d %H:%M:%S')
+            }
+            
+            response = requests.get(
+                'https://alpma.sellasist.pl/api/v1/orders_logs',
+                headers=headers,
+                params=params,
+                timeout=30
+            )
+            
+            if response.status_code != 200:
+                _logger.error(f"Błąd API orders_logs: {response.status_code}")
+                return False
+                
+            orders_logs = response.json()
+            _logger.info(f"Pobrano {len(orders_logs)} logów zamówień")
+            
+            # Wyciągnij unikalne ID zamówień
+            unique_orders = list(set([log.get('order_id') for log in orders_logs if log.get('order_id')]))
+            _logger.info(f"Znaleziono {len(unique_orders)} unikalnych zamówień")
+            
+            # Sprawdź które zamówienia już mamy
+            existing_orders = self.search([('sellasist_id', 'in', [str(oid) for oid in unique_orders])])
+            existing_ids = set([int(order.sellasist_id) for order in existing_orders])
+            
+            # Przetwórz tylko nowe zamówienia
+            new_orders = [oid for oid in unique_orders if oid not in existing_ids]
+            _logger.info(f"Nowych zamówień do przetworzenia: {len(new_orders)}")
+            
+            if not new_orders:
+                _logger.info("Brak nowych zamówień do synchronizacji")
+                return True
+            
+            # Przetwórz maksymalnie 10 nowych zamówień na raz
+            synced_count = 0
+            for order_id in new_orders[:10]:
+                try:
+                    if self._sync_single_order_safe(config, order_id):
+                        synced_count += 1
+                    time.sleep(1)  # Pauza między zamówieniami
+                except Exception as e:
+                    _logger.error(f"Błąd synchronizacji zamówienia {order_id}: {str(e)}")
+                    continue
+                        
+            _logger.info(f"Zsynchronizowano {synced_count} nowych zamówień")
+            return True
+            
+        except Exception as e:
+            _logger.error(f"Błąd synchronizacji zamówień: {str(e)}")
+            return False
+
+    def _sync_single_order_safe(self, config, order_id):
+        """Synchronizuj pojedyncze zamówienie z bezpiecznym zarządzaniem błędów"""
+        try:
+            headers = {
+                'accept': '*/*',
+                'apiKey': config.api_key
+            }
+            
+            response = requests.get(
+                f'https://alpma.sellasist.pl/api/v1/orders/{order_id}',
+                headers=headers,
+                timeout=30
+            )
+            
+            if response.status_code != 200:
+                _logger.error(f"Błąd API orders/{order_id}: {response.status_code}")
+                return False
+                
+            order_data = response.json()
+            
+            # Sprawdź czy zamówienie już istnieje
+            existing = self.search([('sellasist_id', '=', str(order_id))])
+            
+            # Przygotuj dane do zapisu
+            vals = self._prepare_order_vals(order_data)
+            
+            if existing:
+                existing.write(vals)
+                _logger.info(f"Zaktualizowano zamówienie {order_id}")
+            else:
+                self.create(vals)
+                _logger.info(f"Utworzono zamówienie {order_id}")
+                
+            return True
+            
+        except Exception as e:
+            _logger.error(f"Błąd synchronizacji zamówienia {order_id}: {str(e)}")
+            return False
+
+    def _prepare_order_vals(self, data):
+        """Przygotuj wartości do zapisu z danych API - z lepszym obsługiwaniem błędów"""
+        def safe_datetime(date_str):
+            if date_str:
+                try:
+                    return datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+                except:
+                    return None
+            return None
+            
+        def safe_date(date_str):
+            if date_str:
+                try:
+                    return datetime.strptime(date_str, '%Y-%m-%d').date()
+                except:
+                    return None
+            return None
+            
+        def safe_float(value, default=0.0):
+            """Bezpieczna konwersja na float"""
+            if value is None or value == '':
+                return default
+            try:
+                return float(value)
+            except (ValueError, TypeError):
+                return default
+
+        # Podstawowe dane
+        vals = {
+            'sellasist_id': str(data.get('id', '')),
+            'is_copied': data.get('is_copied') == 'true',
+            'creator': data.get('creator', ''),
+            'date': safe_datetime(data.get('date')),
+            'order_master': data.get('order_master'),
+            'last_status_change': safe_datetime(data.get('last_status_change')),
+            'placeholder': data.get('placeholder') == '1',
+            'important': data.get('important') == '1',
+            'deadline': safe_date(data.get('deadline')),
+            'source': data.get('source', ''),
+            'shop': data.get('shop'),
+            'tracking_number': data.get('tracking_number'),
+            'document_number': data.get('document_number', ''),
+            'invoice': data.get('invoice') == '1',
+            'email': data.get('email', ''),
+            'total': safe_float(data.get('total')),
+            'comment': data.get('comment', ''),
+            'raw_data': json.dumps(data),
+            'last_sync': fields.Datetime.now(),
+            'sync_status': 'new',
+        }
+        
+        # Status
+        if data.get('status'):
+            status = data['status']
+            vals.update({
+                'status_id': status.get('id', ''),
+                'status_name': status.get('name', ''),
+            })
+            
+        # Wysyłka
+        if data.get('shipment'):
+            shipment = data['shipment']
+            vals.update({
+                'shipment_id': shipment.get('id', ''),
+                'shipment_name': shipment.get('name', ''),
+                'shipment_total': safe_float(shipment.get('total')),
+                'shipment_pickup_point': shipment.get('pickup_point', ''),
+                'shipment_pickup_code': shipment.get('pickup_code', ''),
+                'delivery_date': safe_date(shipment.get('delivery_date')),
+                'shipment_internal_name': shipment.get('internal_name', ''),
+            })
+            
+        # Płatność
+        if data.get('payment'):
+            payment = data['payment']
+            vals.update({
+                'payment_id': payment.get('id', ''),
+                'payment_name': payment.get('name', ''),
+                'payment_paid': safe_float(payment.get('paid')),
+                'payment_paid_date': safe_datetime(payment.get('paid_date')),
+                'payment_cod': payment.get('cod') == 1,
+                'payment_status': payment.get('status', ''),
+                'payment_currency': payment.get('currency', ''),
+                'payment_tax': safe_float(payment.get('tax')),
+            })
+            
+        # Dane zewnętrzne
+        if data.get('external_data'):
+            ext = data['external_data']
+            vals.update({
+                'external_id': ext.get('external_id', ''),
+                'external_login': ext.get('external_login', ''),
+                'external_user_id': ext.get('external_user_id', ''),
+                'external_account': ext.get('external_account', ''),
+                'external_account_name': ext.get('external_account_name', ''),
+                'external_shipment_name': ext.get('external_shipment_name', ''),
+                'external_payment_name': ext.get('external_payment_name', ''),
+                'external_number_of_packages': ext.get('external_number_of_packages', ''),
+                'external_smart': ext.get('external_smart', ''),
+                'external_type': ext.get('external_type', ''),
+            })
+            
+        # Adres rachunku
+        if data.get('bill_address'):
+            bill = data['bill_address']
+            vals.update({
+                'bill_name': bill.get('name', ''),
+                'bill_surname': bill.get('surname', ''),
+                'bill_street': bill.get('street', ''),
+                'bill_home_number': bill.get('home_number', ''),
+                'bill_flat_number': bill.get('flat_number', ''),
+                'bill_description': bill.get('description', ''),
+                'bill_postcode': bill.get('postcode', ''),
+                'bill_city': bill.get('city', ''),
+                'bill_state': bill.get('state', ''),
+                'bill_phone': bill.get('phone', ''),
+                'bill_company_name': bill.get('company_name', ''),
+                'bill_company_nip': bill.get('company_nip', ''),
+            })
+            if bill.get('country'):
+                country = bill['country']
+                vals.update({
+                    'bill_country_id': country.get('id', ''),
+                    'bill_country_name': country.get('name', ''),
+                    'bill_country_code': country.get('code', ''),
+                })
+                
+        # Adres wysyłki
+        if data.get('shipment_address'):
+            ship = data['shipment_address']
+            vals.update({
+                'ship_name': ship.get('name', ''),
+                'ship_surname': ship.get('surname', ''),
+                'ship_street': ship.get('street', ''),
+                'ship_home_number': ship.get('home_number', ''),
+                'ship_flat_number': ship.get('flat_number', ''),
+                'ship_description': ship.get('description', ''),
+                'ship_postcode': ship.get('postcode', ''),
+                'ship_city': ship.get('city', ''),
+                'ship_state': ship.get('state', ''),
+                'ship_phone': ship.get('phone', ''),
+                'ship_company_name': ship.get('company_name', ''),
+                'ship_company_nip': ship.get('company_nip', ''),
+            })
+            if ship.get('country'):
+                country = ship['country']
+                vals.update({
+                    'ship_country_id': country.get('id', ''),
+                    'ship_country_name': country.get('name', ''),
+                    'ship_country_code': country.get('code', ''),
+                })
+                
+        # Punkt odbioru
+        if data.get('pickup_point'):
+            pickup = data['pickup_point']
+            vals.update({
+                'pickup_code': pickup.get('code', ''),
+                'pickup_type': pickup.get('type', ''),
+                'pickup_address': pickup.get('address', ''),
+            })
+            
+        # Zapisz złożone dane jako JSON
+        if data.get('carts'):
+            vals['carts_data'] = json.dumps(data['carts'])
+        if data.get('payments'):
+            vals['payments_data'] = json.dumps(data['payments'])
+        if data.get('additional_fields'):
+            vals['additional_fields_data'] = json.dumps(data['additional_fields'])
+        if data.get('notes'):
+            vals['notes_data'] = json.dumps(data['notes'])
+            
+        return vals
+
+    def action_sync_to_sale_order(self):
+        """Utwórz zamówienie sprzedaży w Odoo"""
+        self.ensure_one()
+        
+        if self.sale_order_id:
+            return {
+                'type': 'ir.actions.act_window',
+                'res_model': 'sale.order',
+                'res_id': self.sale_order_id.id,
+                'view_mode': 'form',
+                'target': 'current',
+            }
+            
+        # Znajdź lub utwórz klienta
+        partner = self._get_or_create_partner()
+        
+        # Utwórz zamówienie sprzedaży
+        sale_vals = {
+            'partner_id': partner.id,
+            'date_order': self.date or fields.Datetime.now(),
+            'client_order_ref': self.document_number or self.sellasist_id,
+            'note': self.comment,
+            'state': 'draft',
+        }
+        
+        sale_order = self.env['sale.order'].create(sale_vals)
+        
+        # Dodaj linie zamówienia z danych carts
+        if self.carts_data:
+            carts = json.loads(self.carts_data)
+            for cart in carts:
+                # Znajdź lub utwórz produkt
+                product = self._get_or_create_product(cart)
+                
+                line_vals = {
+                    'order_id': sale_order.id,
+                    'product_id': product.id,
+                    'product_uom_qty': float(cart.get('quantity', 1)),
+                    'price_unit': float(cart.get('price', 0)),
+                    'name': cart.get('name', ''),
+                }
+                self.env['sale.order.line'].create(line_vals)
+        
+        # Powiąż zamówienia
+        self.sale_order_id = sale_order.id
+        self.synced = True
+        self.sync_status = 'synced'
+        
+        # Automatycznie utwórz fakturę/paragon jeśli zamówienie jest opłacone
+        if self.payment_status == 'paid':
+            self._create_invoice(sale_order)
+        
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'sale.order',
+            'res_id': sale_order.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+
+    def _create_invoice(self, sale_order):
+        """Utwórz fakturę lub paragon na podstawie zamówienia"""
+        try:
+            # Potwierdź zamówienie
+            sale_order.action_confirm()
+            
+            # Utwórz fakturę
+            invoice_vals = sale_order._prepare_invoice()
+            
+            # Określ typ dokumentu na podstawie pola invoice
+            if self.invoice and self.bill_company_nip:
+                # Faktura VAT dla firmy
+                invoice_vals.update({
+                    'move_type': 'out_invoice',
+                    'invoice_date': self.payment_paid_date.date() if self.payment_paid_date else fields.Date.today(),
+                })
+            else:
+                # Paragon dla osoby prywatnej
+                invoice_vals.update({
+                    'move_type': 'out_receipt',
+                    'invoice_date': self.payment_paid_date.date() if self.payment_paid_date else fields.Date.today(),
+                })
+            
+            invoice = self.env['account.move'].create(invoice_vals)
+            
+            # Powiąż z zamówieniem Sellasist
+            self.account_move_id = invoice.id
+            
+            # Automatycznie potwierdź fakturę jeśli jest opłacona
+            if self.payment_status == 'paid':
+                invoice.action_post()
+                
+                # Zarejestruj płatność
+                self._register_payment(invoice)
+            
+            _logger.info(f"Utworzono fakturę/paragon {invoice.name} dla zamówienia {self.sellasist_id}")
+            
+        except Exception as e:
+            _logger.error(f"Błąd tworzenia faktury dla zamówienia {self.sellasist_id}: {str(e)}")
+
+    def _register_payment(self, invoice):
+        """Zarejestruj płatność dla faktury"""
+        try:
+            if not invoice or invoice.payment_state == 'paid':
+                return
+                
+            # Znajdź dziennik kasowy/bankowy
+            payment_journal = self.env['account.journal'].search([
+                ('type', 'in', ['bank', 'cash']),
+                ('company_id', '=', invoice.company_id.id)
+            ], limit=1)
+            
+            if not payment_journal:
+                _logger.warning("Brak dziennika płatności")
+                return
+            
+            # Utwórz płatność
+            payment_vals = {
+                'payment_type': 'inbound',
+                'partner_type': 'customer',
+                'partner_id': invoice.partner_id.id,
+                'amount': self.payment_paid,
+                'currency_id': invoice.currency_id.id,
+                'date': self.payment_paid_date.date() if self.payment_paid_date else fields.Date.today(),
+                'journal_id': payment_journal.id,
+                'payment_method_line_id': payment_journal.inbound_payment_method_line_ids[0].id,
+                'ref': f"Płatność Sellasist {self.sellasist_id}",
+            }
+            
+            payment = self.env['account.payment'].create(payment_vals)
+            payment.action_post()
+            
+            # Powiąż płatność z fakturą
+            invoice_lines = invoice.line_ids.filtered(lambda l: l.account_id.account_type == 'asset_receivable')
+            payment_lines = payment.line_ids.filtered(lambda l: l.account_id.account_type == 'asset_receivable')
+            
+            if invoice_lines and payment_lines:
+                (invoice_lines + payment_lines).reconcile()
+                
+            _logger.info(f"Zarejestrowano płatność {payment.name} dla faktury {invoice.name}")
+            
+        except Exception as e:
+            _logger.error(f"Błąd rejestracji płatności: {str(e)}")
+
+    def _get_or_create_partner(self):
+        """Znajdź lub utwórz partnera na podstawie danych zamówienia"""
+        # Sprawdź czy istnieje partner z tym emailem
+        partner = self.env['res.partner'].search([('email', '=', self.email)], limit=1)
+        
+        if not partner and self.bill_company_nip:
+            # Sprawdź po NIP
+            partner = self.env['res.partner'].search([('vat', '=', self.bill_company_nip)], limit=1)
+            
+        if not partner:
+            # Utwórz nowego partnera
+            name = f"{self.bill_name} {self.bill_surname}".strip()
+            if self.bill_company_name:
+                name = self.bill_company_name
+                
+            partner_vals = {
+                'name': name or 'Klient Sellasist',
+                'email': self.email,
+                'phone': self.bill_phone,
+                'street': f"{self.bill_street} {self.bill_home_number}".strip(),
+                'street2': self.bill_flat_number,
+                'city': self.bill_city,
+                'zip': self.bill_postcode,
+                'vat': self.bill_company_nip,
+                'is_company': bool(self.bill_company_name),
+                'customer_rank': 1,
+            }
+            
+            # Znajdź kraj
+            if self.bill_country_code:
+                country = self.env['res.country'].search([('code', '=', self.bill_country_code)], limit=1)
+                if country:
+                    partner_vals['country_id'] = country.id
+                    
+            partner = self.env['res.partner'].create(partner_vals)
+            
+        return partner
+
+    def _get_or_create_product(self, cart_data):
+        """Znajdź lub utwórz produkt na podstawie danych koszyka"""
+        ean = cart_data.get('ean', '')
+        symbol = cart_data.get('symbol', '')
+        
+        # Sprawdź po EAN/kodzie kreskowym
+        product = None
+        if ean:
+            product = self.env['product.product'].search([('barcode', '=', ean)], limit=1)
+            
+        if not product and symbol:
+            # Sprawdź po default_code
+            product = self.env['product.product'].search([('default_code', '=', symbol)], limit=1)
+            
+        if not product:
+            # Utwórz nowy produkt
+            product_vals = {
+                'name': cart_data.get('name', 'Produkt z Sellasist'),
+                'default_code': symbol or '',
+                'barcode': ean or '',
+                'list_price': float(cart_data.get('price', 0)),
+                'weight': float(cart_data.get('weight', 0)),
+                'type': 'product',
+                'invoice_policy': 'order',
+            }
+            product = self.env['product.product'].create(product_vals)
+            
+        return product
+
+    def action_create_invoice(self):
+        """Ręczne tworzenie faktury/paragonu"""
+        self.ensure_one()
+        
+        if not self.sale_order_id:
+            raise models.UserError("Najpierw utwórz zamówienie sprzedaży")
+            
+        if self.account_move_id:
+            return {
+                'type': 'ir.actions.act_window',
+                'res_model': 'account.move',
+                'res_id': self.account_move_id.id,
+                'view_mode': 'form',
+                'target': 'current',
+            }
+            
+        self._create_invoice(self.sale_order_id)
+        
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move',
+            'res_id': self.account_move_id.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+
+    @api.model
+    def test_sync_api(self):
+        """Test funkcji synchronizacji"""
+        config = self.env['sellasist.config'].search([('active', '=', True)], limit=1)
+        if not config:
+            return "❌ Brak aktywnej konfiguracji Sellasist"
+            
+        try:
+            import requests
+            from datetime import datetime, timedelta
+            
+            # Test prostego zapytania
+            headers = {
+                'accept': 'application/json',
+                'apiKey': config.api_key
+            }
+            
+            # Test orders_logs
+            date_to = datetime.now()
+            date_from = date_to - timedelta(hours=2)
+            
+            params = {
+                'date_from': date_from.strftime('%Y-%m-%d %H:%M:%S'),
+                'date_to': date_to.strftime('%Y-%m-%d %H:%M:%S')
+            }
+            
+            response = requests.get(
+                'https://alpma.sellasist.pl/api/v1/orders_logs',
+                headers=headers,
+                params=params,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                unique_orders = list(set([log.get('order_id') for log in data if log.get('order_id')]))
+                
+                # Sprawdź które już mamy
+                existing = self.search([('sellasist_id', 'in', [str(oid) for oid in unique_orders])])
+                existing_ids = set([int(order.sellasist_id) for order in existing])
+                new_orders = [oid for oid in unique_orders if oid not in existing_ids]
+                
+                return f"✅ API działa!\n📊 Logów: {len(data)}\n🔢 Unikalnych zamówień: {len(unique_orders)}\n📦 Już mamy: {len(existing_ids)}\n🆕 Nowych: {len(new_orders)}\n📝 Nowe ID: {new_orders[:5]}"
+            else:
+                return f"❌ Błąd API: {response.status_code}"
+                
+        except Exception as e:
+            return f"❌ Błąd: {str(e)}"

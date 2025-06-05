@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_scanner_session_form" model="ir.ui.view">
+        <field name="name">inventory.scanner.session.form</field>
+        <field name="model">inventory.scanner.session</field>
+        <field name="arch" type="xml">
+            <form string="Scanner Session">
+                <header>
+                    <button name="action_start" string="Start Session" type="object" 
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="open_scanner" string="📱 Open QR Scanner" type="object" 
+                            class="btn-success" invisible="state not in ['draft', 'in_progress']"/>
+                    <button name="action_finish" string="Finish Session" type="object" 
+                            class="btn-primary" invisible="state != 'in_progress'"/>
+                    <button name="action_cancel" string="Cancel" type="object" 
+                            invisible="state in ['done', 'cancelled']"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" required="1"/>
+                            <field name="scanner_mode"/>
+                            <field name="user_id"/>
+                        </group>
+                        <group>
+                            <field name="current_location_id"/>
+                            <field name="company_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="scan_count" readonly="1"/>
+                            <field name="product_count" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="view_scanner_session_tree" model="ir.ui.view">
+        <field name="name">inventory.scanner.session.tree</field>
+        <field name="model">inventory.scanner.session</field>
+        <field name="arch" type="xml">
+            <tree string="Scanner Sessions">
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="scanner_mode"/>
+                <field name="state"/>
+                <field name="scan_count"/>
+                <field name="create_date"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record id="action_scanner_session" model="ir.actions.act_window">
+        <field name="name">QR Scanner Sessions</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">inventory.scanner.session</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new scanner session
+            </p>
+            <p>
+                Start a QR scanning session to manage inventory with your mobile device.
+            </p>
+        </field>
+    </record>
+    
+    <menuitem id="menu_scanner_sessions"
+              name="QR Scanner Sessions"
+              parent="stock.menu_stock_inventory_control"
+              action="action_scanner_session"
+              sequence="10"/>
+
+</odoo>

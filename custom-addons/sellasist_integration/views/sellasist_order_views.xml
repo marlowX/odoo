@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+   <data>
+       <!-- Lista zamówień z przyciskiem synchronizacji -->
+       <record id="view_sellasist_order_tree" model="ir.ui.view">
+           <field name="name">sellasist.order.tree</field>
+           <field name="model">sellasist.order</field>
+           <field name="arch" type="xml">
+               <tree string="Zamówienia Sellasist" decoration-info="synced==True" decoration-warning="synced==False">
+                   <header>
+                       <button name="%(action_sellasist_sync_wizard)d" string="Synchronizuj z Sellasist" type="action" class="btn-primary"/>
+                   </header>
+                   <field name="sellasist_id"/>
+                   <field name="document_number"/>
+                   <field name="date"/>
+                   <field name="status_name"/>
+                   <field name="bill_name"/>
+                   <field name="bill_surname"/>
+                   <field name="total"/>
+                   <field name="payment_status"/>
+                   <field name="shipment_name"/>
+                   <field name="sync_status"/>
+                   <field name="synced"/>
+                   <field name="sale_order_id"/>
+                   <field name="account_move_id"/>
+                   <field name="last_sync"/>
+               </tree>
+           </field>
+       </record>
+
+       <!-- Formularz zamówienia -->
+       <record id="view_sellasist_order_form" model="ir.ui.view">
+           <field name="name">sellasist.order.form</field>
+           <field name="model">sellasist.order</field>
+           <field name="arch" type="xml">
+               <form string="Zamówienie Sellasist">
+                   <header>
+                       <button name="action_sync_to_sale_order" string="Utwórz zamówienie Odoo" 
+                              type="object" class="btn-primary" 
+                              invisible="sale_order_id != False"/>
+                       <button name="action_sync_to_sale_order" string="Otwórz zamówienie Odoo" 
+                              type="object" class="btn-secondary" 
+                              invisible="sale_order_id == False"/>
+                       <button name="action_create_invoice" string="Utwórz fakturę/paragon" 
+                              type="object" class="btn-secondary" 
+                              invisible="account_move_id != False or sale_order_id == False"/>
+                       <button name="action_create_invoice" string="Otwórz fakturę/paragon" 
+                              type="object" class="btn-secondary" 
+                              invisible="account_move_id == False"/>
+                       <field name="sync_status" widget="statusbar"/>
+                   </header>
+                   <sheet>
+                       <div class="oe_button_box" name="button_box">
+                           <button name="action_sync_to_sale_order" type="object" 
+                                  class="oe_stat_button" icon="fa-shopping-cart"
+                                  invisible="sale_order_id == False">
+                               <div class="o_field_widget o_stat_info">
+                                   <span class="o_stat_text">Zamówienie</span>
+                                   <span class="o_stat_text">Odoo</span>
+                               </div>
+                           </button>
+                           <button name="action_create_invoice" type="object" 
+                                  class="oe_stat_button" icon="fa-file-text-o"
+                                  invisible="account_move_id == False">
+                               <div class="o_field_widget o_stat_info">
+                                   <span class="o_stat_text">Faktura</span>
+                                   <span class="o_stat_text">Paragon</span>
+                               </div>
+                           </button>
+                       </div>
+                       
+                       <div class="oe_title">
+                           <h1>
+                               <field name="sellasist_id" readonly="1"/>
+                           </h1>
+                           <h2>
+                               <field name="document_number" readonly="1"/>
+                           </h2>
+                       </div>
+                       
+                       <group>
+                           <group string="Podstawowe informacje">
+                               <field name="creator"/>
+                               <field name="date"/>
+                               <field name="last_status_change"/>
+                               <field name="source"/>
+                               <field name="total"/>
+                               <field name="payment_currency"/>
+                           </group>
+                           <group string="Status i terminy">
+                               <field name="status_name"/>
+                               <field name="deadline"/>
+                               <field name="important"/>
+                               <field name="invoice"/>
+                               <field name="synced"/>
+                               <field name="last_sync"/>
+                           </group>
+                       </group>
+                       
+                       <notebook>
+                           <page string="Klient" name="customer">
+                               <group>
+                                   <group string="Dane kontaktowe">
+                                       <field name="email"/>
+                                       <field name="partner_id"/>
+                                   </group>
+                                   <group string="Dane zewnętrzne">
+                                       <field name="external_login"/>
+                                       <field name="external_account_name"/>
+                                       <field name="external_type"/>
+                                   </group>
+                               </group>
+                               
+                               <group string="Adres rachunku">
+                                   <group>
+                                       <field name="bill_name"/>
+                                       <field name="bill_surname"/>
+                                       <field name="bill_company_name"/>
+                                       <field name="bill_company_nip"/>
+                                       <field name="bill_phone"/>
+                                   </group>
+                                   <group>
+                                       <field name="bill_street"/>
+                                       <field name="bill_home_number"/>
+                                       <field name="bill_flat_number"/>
+                                       <field name="bill_postcode"/>
+                                       <field name="bill_city"/>
+                                       <field name="bill_country_name"/>
+                                   </group>
+                               </group>
+                               
+                               <group string="Adres wysyłki">
+                                   <group>
+                                       <field name="ship_name"/>
+                                       <field name="ship_surname"/>
+                                       <field name="ship_company_name"/>
+                                       <field name="ship_phone"/>
+                                   </group>
+                                   <group>
+                                       <field name="ship_street"/>
+                                       <field name="ship_home_number"/>
+                                       <field name="ship_flat_number"/>
+                                       <field name="ship_postcode"/>
+                                       <field name="ship_city"/>
+                                       <field name="ship_country_name"/>
+                                   </group>
+                               </group>
+                           </page>
+                           
+                           <page string="Płatność" name="payment">
+                               <group>
+                                   <group string="Informacje o płatności">
+                                       <field name="payment_name"/>
+                                       <field name="payment_status"/>
+                                       <field name="payment_paid"/>
+                                       <field name="payment_paid_date"/>
+                                       <field name="payment_cod"/>
+                                       <field name="payment_tax"/>
+                                   </group>
+                                   <group string="Płatności szczegółowe">
+                                       <field name="payments_data" widget="text" readonly="1"/>
+                                   </group>
+                               </group>
+                           </page>
+                           
+                           <page string="Wysyłka" name="shipment">
+                               <group>
+                                   <group string="Informacje o wysyłce">
+                                       <field name="shipment_name"/>
+                                       <field name="shipment_internal_name"/>
+                                       <field name="shipment_total"/>
+                                       <field name="delivery_date"/>
+                                       <field name="tracking_number"/>
+                                   </group>
+                                   <group string="Punkt odbioru">
+                                       <field name="shipment_pickup_point"/>
+                                       <field name="shipment_pickup_code"/>
+                                       <field name="pickup_type"/>
+                                       <field name="pickup_address"/>
+                                   </group>
+                               </group>
+                               <group string="Zewnętrzna nazwa wysyłki">
+                                   <field name="external_shipment_name"/>
+                                   <field name="external_number_of_packages"/>
+                               </group>
+                           </page>
+                           
+                           <page string="Produkty" name="products">
+                               <field name="carts_data" widget="text" readonly="1"/>
+                           </page>
+                           
+                           <page string="Dodatkowe pola" name="additional">
+                               <group>
+                                   <field name="comment" colspan="2"/>
+                                   <field name="additional_fields_data" widget="text" readonly="1"/>
+                                   <field name="notes_data" widget="text" readonly="1"/>
+                               </group>
+                           </page>
+                           
+                           <page string="Synchronizacja" name="sync">
+                               <group>
+                                   <field name="sale_order_id"/>
+                                   <field name="account_move_id"/>
+                                   <field name="sync_error" widget="text"/>
+                                   <field name="raw_data" widget="text" readonly="1"/>
+                               </group>
+                           </page>
+                       </notebook>
+                   </sheet>
+               </form>
+           </field>
+       </record>
+
+       <!-- Pozostałe widoki... -->
+       <record id="view_sellasist_order_search" model="ir.ui.view">
+           <field name="name">sellasist.order.search</field>
+           <field name="model">sellasist.order</field>
+           <field name="arch" type="xml">
+               <search string="Wyszukaj zamówienia">
+                   <field name="sellasist_id"/>
+                   <field name="document_number"/>
+                   <field name="bill_name"/>
+                   <field name="bill_surname"/>
+                   <field name="email"/>
+                   <field name="status_name"/>
+                   
+                   <filter string="Zsynchronizowane" name="synced" domain="[('synced', '=', True)]"/>
+                   <filter string="Niezsynchronizowane" name="not_synced" domain="[('synced', '=', False)]"/>
+                   <filter string="Opłacone" name="paid" domain="[('payment_status', '=', 'paid')]"/>
+                   <filter string="Ważne" name="important" domain="[('important', '=', True)]"/>
+                   
+                   <separator/>
+                   <filter string="Dzisiaj" name="today" 
+                          domain="[('date', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0))),
+                                  ('date', '&lt;', datetime.datetime.combine(context_today() + datetime.timedelta(days=1), datetime.time(0,0,0)))]"/>
+                   <filter string="Ten tydzień" name="this_week" 
+                          domain="[('date', '>=', (context_today() - datetime.timedelta(days=context_today().weekday())).strftime('%Y-%m-%d'))]"/>
+                   
+                   <group expand="0" string="Grupuj według">
+                       <filter string="Status" name="group_status" context="{'group_by': 'status_name'}"/>
+                       <filter string="Źródło" name="group_source" context="{'group_by': 'source'}"/>
+                       <filter string="Płatność" name="group_payment" context="{'group_by': 'payment_status'}"/>
+                       <filter string="Data" name="group_date" context="{'group_by': 'date:day'}"/>
+                   </group>
+               </search>
+           </field>
+       </record>
+
+       <!-- Akcja - USUNIĘTY DOMYŚLNY FILTR -->
+       <record id="action_sellasist_order" model="ir.actions.act_window">
+           <field name="name">Zamówienia Sellasist</field>
+           <field name="res_model">sellasist.order</field>
+           <field name="view_mode">tree,form</field>
+           <field name="context">{}</field>
+       </record>
+
+       <!-- Menu -->
+       <menuitem id="menu_sellasist_orders" 
+                name="Zamówienia Sellasist" 
+                parent="sale.sale_menu_root" 
+                action="action_sellasist_order" 
+                sequence="5"/>
+   </data>
+</odoo>

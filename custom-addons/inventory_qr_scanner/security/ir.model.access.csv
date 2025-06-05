@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_scanner_session_user,inventory.scanner.session.user,model_inventory_scanner_session,stock.group_stock_user,1,1,1,1
+access_scanner_session_manager,inventory.scanner.session.manager,model_inventory_scanner_session,stock.group_stock_manager,1,1,1,1
