@@ -2,5 +2,3 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_product_template_dodatek_user,product.template.dodatek.user,product.model_product_template,base.group_user,1,0,0,0
 access_product_template_dodatek_employee,product.template.dodatek.employee,product.model_product_template,base.group_user,1,1,1,0
 access_product_template_dodatek_manager,product.template.dodatek.manager,product.model_product_template,sales_team.group_sale_manager,1,1,1,1
-access_product_template_dodatek_stock_user,product.template.dodatek.stock.user,product.model_product_template,stock.group_stock_user,1,1,1,0
-access_product_template_dodatek_stock_manager,product.template.dodatek.stock.manager,product.model_product_template,stock.group_stock_manager,1,1,1,1

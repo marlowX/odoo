@@ -29,37 +29,5 @@
             </field>
         </record>
 
-        <!-- Rozszerzenie widoku wyszukiwania produktów - dodanie filtru dla dodatków -->
-        <record id="product_template_search_view_dodatek" model="ir.ui.view">
-            <field name="name">product.template.search.dodatek</field>
-            <field name="model">product.template</field>
-            <field name="inherit_id" ref="product.product_template_search_view"/>
-            <field name="arch" type="xml">
-                
-                <xpath expr="//filter[@name='filter_to_sell']" position="after">
-                    <separator/>
-                    <filter name="filter_dodatek" string="Dodatki" 
-                            domain="[('dodatek', '=', True)]"/>
-                    <filter name="filter_not_dodatek" string="Nie Dodatki" 
-                            domain="[('dodatek', '=', False)]"/>
-                </xpath>
-
-            </field>
-        </record>
-
-        <!-- Rozszerzenie widoku kanban produktów - dodanie informacji o dodatku -->
-        <record id="product_template_kanban_dodatek" model="ir.ui.view">
-            <field name="name">product.template.kanban.dodatek</field>
-            <field name="model">product.template</field>
-            <field name="inherit_id" ref="product.product_template_kanban_view"/>
-            <field name="arch" type="xml">
-                <xpath expr="//div[@class='product_default_code']" position="after">
-                    <div t-if="record.dodatek.value" class="text-success">
-                        <i class="fa fa-plus-circle"/> Dodatek
-                    </div>
-                </xpath>
-            </field>
-        </record>
-
     </data>
 </odoo>
