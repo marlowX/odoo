@@ -53,6 +53,21 @@
                             </group>
                         </group>
 
+                        <!-- Sekcja dla Płyt Meblowych -->
+                        <group string="Parametry płyty meblowej" invisible="typ_meblarski != 'plyta'">
+                            <group>
+                                <field name="dlugosc_cm" string="Długość płyty (cm)" required="typ_meblarski == 'plyta'" placeholder="2800"/>
+                                <field name="szerokosc_cm" string="Szerokość płyty (cm)" required="typ_meblarski == 'plyta'" placeholder="2070"/>
+                                <field name="grubosc_plyty_mm" string="Grubość płyty (mm)" required="typ_meblarski == 'plyta'" placeholder="18"/>
+                            </group>
+                            <group>
+                                <field name="kolor_manual" string="Kolor/Materiał" placeholder="BIAŁY, ORZECH, SONOMA"/>
+                                <field name="powierzchnia_m2" readonly="1"/>
+                                <field name="wymiary_display" readonly="1"/>
+                                <field name="grubosc_mm" readonly="1"/>
+                            </group>
+                        </group>
+
                         <!-- Sekcja dla Produktów/Mebli -->
                         <group string="Wymiary mebla" invisible="typ_meblarski not in ['produkt_pojedynczy', 'zestaw']">
                             <group>
@@ -63,6 +78,41 @@
                             <group>
                                 <field name="kolor_manual"/>
                                 <field name="objetosc_m3" readonly="1"/>
+                                <field name="wymiary_display" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <!-- Parametry szafek -->
+                        <group string="Parametry szafki" invisible="typ_meblarski not in ['produkt_pojedynczy', 'zestaw']">
+                            <group>
+                                <field name="parametr_nogi"/>
+                                <field name="parametr_uchyt"/>
+                            </group>
+                            <group>
+                                <field name="parametr_drzwi"/>
+                            </group>
+                        </group>
+
+                        <!-- Sekcja dla Okuć -->
+                        <group string="Parametry okucia" invisible="typ_meblarski != 'okucia'">
+                            <group>
+                                <field name="dlugosc_okucia_mm" placeholder="450"/>
+                                <field name="nosnosc_kg" placeholder="25"/>
+                            </group>
+                            <group>
+                                <field name="wymiary_display" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <!-- Sekcja dla Obrzeży -->
+                        <group string="Parametry obrzeża" invisible="typ_meblarski != 'obrzeza'">
+                            <group>
+                                <field name="szerokosc_obrzeza_mm" placeholder="22"/>
+                                <field name="grubosc_obrzeza_mm" placeholder="0.8"/>
+                                <field name="dlugosc_rolki_m" placeholder="50"/>
+                            </group>
+                            <group>
+                                <field name="kolor_manual"/>
                                 <field name="wymiary_display" readonly="1"/>
                             </group>
                         </group>

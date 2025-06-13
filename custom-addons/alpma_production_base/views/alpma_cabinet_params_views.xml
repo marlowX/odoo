@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <!-- ===== PARAMETRY NÓG ===== -->
+        
+        <!-- Lista parametrów nóg -->
+        <record id="view_alpma_cabinet_param_nogi_tree" model="ir.ui.view">
+            <field name="name">alpma.cabinet.param.nogi.tree</field>
+            <field name="model">alpma.cabinet.param.nogi</field>
+            <field name="arch" type="xml">
+                <tree string="Parametry nóg" editable="bottom">
+                    <field name="sequence" widget="handle"/>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="description"/>
+                    <field name="active"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Formularz parametru nóg -->
+        <record id="view_alpma_cabinet_param_nogi_form" model="ir.ui.view">
+            <field name="name">alpma.cabinet.param.nogi.form</field>
+            <field name="model">alpma.cabinet.param.nogi</field>
+            <field name="arch" type="xml">
+                <form string="Parametr nóg">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="code"/>
+                                <field name="sequence"/>
+                            </group>
+                            <group>
+                                <field name="active"/>
+                            </group>
+                        </group>
+                        <group string="Opis">
+                            <field name="description" nolabel="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Akcja parametrów nóg -->
+        <record id="action_alpma_cabinet_param_nogi" model="ir.actions.act_window">
+            <field name="name">Parametry nóg</field>
+            <field name="res_model">alpma.cabinet.param.nogi</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!-- ===== PARAMETRY UCHWYTÓW ===== -->
+        
+        <!-- Lista parametrów uchwytów -->
+        <record id="view_alpma_cabinet_param_uchyt_tree" model="ir.ui.view">
+            <field name="name">alpma.cabinet.param.uchyt.tree</field>
+            <field name="model">alpma.cabinet.param.uchyt</field>
+            <field name="arch" type="xml">
+                <tree string="Parametry uchwytów" editable="bottom">
+                    <field name="sequence" widget="handle"/>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="description"/>
+                    <field name="active"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Formularz parametru uchwytu -->
+        <record id="view_alpma_cabinet_param_uchyt_form" model="ir.ui.view">
+            <field name="name">alpma.cabinet.param.uchyt.form</field>
+            <field name="model">alpma.cabinet.param.uchyt</field>
+            <field name="arch" type="xml">
+                <form string="Parametr uchwytu">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="code"/>
+                                <field name="sequence"/>
+                            </group>
+                            <group>
+                                <field name="active"/>
+                            </group>
+                        </group>
+                        <group string="Opis">
+                            <field name="description" nolabel="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Akcja parametrów uchwytów -->
+        <record id="action_alpma_cabinet_param_uchyt" model="ir.actions.act_window">
+            <field name="name">Parametry uchwytów</field>
+            <field name="res_model">alpma.cabinet.param.uchyt</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!-- ===== PARAMETRY DRZWI ===== -->
+        
+        <!-- Lista parametrów drzwi -->
+        <record id="view_alpma_cabinet_param_drzwi_tree" model="ir.ui.view">
+            <field name="name">alpma.cabinet.param.drzwi.tree</field>
+            <field name="model">alpma.cabinet.param.drzwi</field>
+            <field name="arch" type="xml">
+                <tree string="Parametry drzwi" editable="bottom">
+                    <field name="sequence" widget="handle"/>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="description"/>
+                    <field name="active"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Formularz parametru drzwi -->
+        <record id="view_alpma_cabinet_param_drzwi_form" model="ir.ui.view">
+            <field name="name">alpma.cabinet.param.drzwi.form</field>
+            <field name="model">alpma.cabinet.param.drzwi</field>
+            <field name="arch" type="xml">
+                <form string="Parametr drzwi">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="code"/>
+                                <field name="sequence"/>
+                            </group>
+                            <group>
+                                <field name="active"/>
+                            </group>
+                        </group>
+                        <group string="Opis">
+                            <field name="description" nolabel="1"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Akcja parametrów drzwi -->
+        <record id="action_alpma_cabinet_param_drzwi" model="ir.actions.act_window">
+            <field name="name">Parametry drzwi</field>
+            <field name="res_model">alpma.cabinet.param.drzwi</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+    </data>
+</odoo>

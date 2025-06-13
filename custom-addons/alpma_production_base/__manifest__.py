@@ -1,6 +1,6 @@
 {
     'name': 'Alpma Production Base',
-    'version': '17.0.1.0.0',
+    'version': '17.0.1.0.2',
     'category': 'Manufacturing',
     'summary': 'Bazowe rozszerzenia MRP dla produkcji mebli Alpma',
     'description': """
@@ -15,6 +15,7 @@ Funkcjonalności:
 - Podstawowe typy produktów (zestawy, produkty, formatki, okucia)
 - Jednostki miary specyficzne dla mebli
 - Integracja z Airtable (record ID)
+- Konfigurowalne parametry szafek (nogi, uchwyty, drzwi)
 
 Wymagania:
 - Odoo 17.0 Community Edition
@@ -35,11 +36,12 @@ Wymagania:
         
         # Data  
         'data/product_category_data.xml',
-        'data/uom_data.xml',
+        'data/alpma_cabinet_params_data.xml',
         
         # Views
         'views/product_template_views.xml',
         'views/product_category_views.xml',
+        'views/alpma_cabinet_params_views.xml',
         
         # Menu
         'views/alpma_menu.xml',

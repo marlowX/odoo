@@ -1,6 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Menu będą dodane później -->
+        
+        <!-- Menu główne Alpma -->
+        <menuitem id="menu_alpma_main" 
+                  name="Alpma" 
+                  sequence="50"/>
+        
+        <!-- Submenu Konfiguracja -->
+        <menuitem id="menu_alpma_config" 
+                  name="Konfiguracja" 
+                  parent="menu_alpma_main" 
+                  sequence="90"/>
+        
+        <!-- Menu parametrów szafek -->
+        <menuitem id="menu_alpma_cabinet_params" 
+                  name="Parametry szafek" 
+                  parent="menu_alpma_config" 
+                  sequence="10"/>
+        
+        <!-- Submenu dla poszczególnych parametrów -->
+        <menuitem id="menu_alpma_param_nogi" 
+                  name="Parametry nóg" 
+                  parent="menu_alpma_cabinet_params" 
+                  action="action_alpma_cabinet_param_nogi" 
+                  sequence="10"/>
+        
+        <menuitem id="menu_alpma_param_uchyt" 
+                  name="Parametry uchwytów" 
+                  parent="menu_alpma_cabinet_params" 
+                  action="action_alpma_cabinet_param_uchyt" 
+                  sequence="20"/>
+        
+        <menuitem id="menu_alpma_param_drzwi" 
+                  name="Parametry drzwi" 
+                  parent="menu_alpma_cabinet_params" 
+                  action="action_alpma_cabinet_param_drzwi" 
+                  sequence="30"/>
+
     </data>
 </odoo>

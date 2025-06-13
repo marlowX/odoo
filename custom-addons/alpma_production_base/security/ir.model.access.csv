@@ -1,3 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_product_template_alpma,access_product_template_alpma,product.model_product_template,base.group_user,1,1,1,1
-access_product_category_alpma,access_product_category_alpma,product.model_product_category,base.group_user,1,1,1,1
+access_product_template_alpma,product.template.alpma,product.model_product_template,base.group_user,1,1,1,1
+access_product_category_alpma,product.category.alpma,product.model_product_category,base.group_user,1,1,1,1
+access_alpma_cabinet_param_nogi,alpma.cabinet.param.nogi,model_alpma_cabinet_param_nogi,base.group_user,1,1,1,1
+access_alpma_cabinet_param_uchyt,alpma.cabinet.param.uchyt,model_alpma_cabinet_param_uchyt,base.group_user,1,1,1,1
+access_alpma_cabinet_param_drzwi,alpma.cabinet.param.drzwi,model_alpma_cabinet_param_drzwi,base.group_user,1,1,1,1
