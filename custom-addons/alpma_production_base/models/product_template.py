@@ -41,6 +41,14 @@ class ProductTemplate(models.Model):
         help="Seria szafki (VB, SUPRA, TRES itp.) - wymagane"
     )
 
+    # === POWIĄZANIE Z PRODUKTEM GOTOWYM ===
+    produkt_powiazany = fields.Many2one(
+        'product.template',
+        string='Produkt powiązany',
+        domain="[('typ_meblarski', 'in', ['produkt_pojedynczy', 'zestaw'])]",
+        help="SKU produktu gotowego do którego należy ta formatka"
+    )
+
     # === WYMIARY PODSTAWOWE (FORMATKI I MEBLE) ===
     dlugosc_cm = fields.Float(
         string='Długość (cm)',
@@ -216,6 +224,13 @@ class ProductTemplate(models.Model):
         help="Czy to jest produkt zarządzany przez system Alpma"
     )
 
+    # === WIDOCZNOŚĆ SKU ===
+    show_sku_field = fields.Boolean(
+        string='Pokaż SKU',
+        compute='_compute_show_sku',
+        help="Czy pokazać pole SKU dla tego typu produktu"
+    )
+
     # === COMPUTE METHODS ===
     @api.depends('plyta_bazowa', 'plyta_bazowa.grubosc_plyty_mm')
     def _compute_grubosc(self):
@@ -375,6 +390,12 @@ class ProductTemplate(models.Model):
                 record.powierzchnia_m2 = (record.dlugosc_cm * record.szerokosc_cm) / 10000
             else:
                 record.powierzchnia_m2 = 0.0
+
+    @api.depends('typ_meblarski')
+    def _compute_show_sku(self):
+        """Określa czy pokazać SKU - tylko dla produktów gotowych"""
+        for record in self:
+            record.show_sku_field = record.typ_meblarski in ['produkt_pojedynczy', 'zestaw', 'okucia', 'akcesoria']
 
     # === CONSTRAINTS ===
     @api.constrains('dlugosc_cm', 'szerokosc_cm', 'wysokosc_cm', 'grubosc_plyty_mm', 'grubosc_obrzeza_mm')
