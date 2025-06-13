@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Rozszerzone widoki BOM z polami obliczeniowymi -->
+    <record id="mrp_bom_form_furniture" model="ir.ui.view">
+        <field name="name">mrp.bom.form.furniture</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+        <field name="arch" type="xml">
+            <field name="product_qty" position="after">
+                <field name="is_furniture_bom" readonly="1"/>
+                <field name="total_plate_area" readonly="1"/>
+                <field name="total_edge_length" readonly="1"/>
+                <field name="estimated_cost" readonly="1"/>
+                <field name="currency_id" invisible="1"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Widok drzewa z dodatkowymi kolumnami -->
+    <record id="mrp_bom_tree_furniture" model="ir.ui.view">
+        <field name="name">mrp.bom.tree.furniture</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="product_qty" position="after">
+                <field name="is_furniture_bom"/>
+                <field name="total_plate_area" sum="Łączna powierzchnia"/>
+                <field name="estimated_cost" sum="Łączny koszt"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Filtry wyszukiwania -->
+    <record id="mrp_bom_search_furniture" model="ir.ui.view">
+        <field name="name">mrp.bom.search.furniture</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.view_mrp_bom_filter"/>
+        <field name="arch" type="xml">
+            <filter name="archived" position="after">
+                <separator/>
+                <filter name="furniture_bom" string="BOM meblarski" domain="[('is_furniture_bom', '=', True)]"/>
+                <filter name="formatka_bom" string="BOM formatek" domain="[('product_tmpl_id.furniture_type', '=', 'formatka')]"/>
+            </filter>
+        </field>
+    </record>
+
+    <!-- Akcja dla BOM meblarskich -->
+    <record id="action_mrp_bom_furniture" model="ir.actions.act_window">
+        <field name="name">BOM meblarski</field>
+        <field name="res_model">mrp.bom</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('is_furniture_bom', '=', True)]</field>
+        <field name="context">{'default_is_furniture_bom': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Utwórz pierwszy BOM meblarski
+            </p>
+            <p>
+                BOM (Bill of Materials) meblarski automatycznie oblicza zapotrzebowanie 
+                materiałowe na podstawie wymiarów formatek i wybranych materiałów.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_mrp_bom_furniture" 
+              action="action_mrp_bom_furniture" 
+              parent="mrp.menu_mrp_bom" 
+              sequence="15"/>
+
+</odoo>

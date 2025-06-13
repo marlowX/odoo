@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Widok formularza produktu z dynamicznymi polami -->
+    <record id="product_template_form_furniture" model="ir.ui.view">
+        <field name="name">product.template.form.furniture</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <field name="categ_id" position="after">
+                <!-- Główne pole typu meblarskiego -->
+                <field name="furniture_type" widget="radio"/>
+            </field>
+            
+            <!-- Dodanie przycisków BOM dla formatek -->
+            <xpath expr="//header" position="inside">
+                <button name="action_create_bom" 
+                        type="object" 
+                        string="Utwórz BOM" 
+                        class="btn-primary"
+                        invisible="furniture_type != 'formatka'"/>
+                <button name="action_view_boms" 
+                        type="object" 
+                        string="Pokaż BOM" 
+                        class="btn-secondary"
+                        invisible="furniture_type != 'formatka'"/>
+                <button name="action_auto_generate_bom" 
+                        type="object" 
+                        string="Auto-generuj BOM" 
+                        class="btn-success"
+                        invisible="furniture_type != 'formatka'"/>
+            </xpath>
+            
+            <!-- Dodanie pól specyficznych dla każdego typu -->
+            <notebook position="inside">
+                <!-- Karta dla Formatek -->
+                <page string="Formatka" invisible="furniture_type != 'formatka'">
+                    <group>
+                        <group string="Wymiary formatki">
+                            <field name="dlugosc" required="furniture_type == 'formatka'"/>
+                            <field name="szerokosc" required="furniture_type == 'formatka'"/>
+                            <field name="grubosc" required="furniture_type == 'formatka'"/>
+                        </group>
+                        <group string="Materiały">
+                            <field name="plyta_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                        </group>
+                    </group>
+                    <group string="Obrzeża">
+                        <group>
+                            <field name="obrzeze_gora_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="obrzeze_dol_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                        </group>
+                        <group>
+                            <field name="obrzeze_lewo_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="obrzeze_prawo_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                        </group>
+                    </group>
+                </page>
+
+                <!-- Karta dla Płyt meblowych -->
+                <page string="Płyta meblowa" invisible="furniture_type != 'plyta_meblowa'">
+                    <group>
+                        <group string="Wymiary płyty">
+                            <field name="plate_length" required="furniture_type == 'plyta_meblowa'"/>
+                            <field name="plate_width" required="furniture_type == 'plyta_meblowa'"/>
+                            <field name="plate_thickness" required="furniture_type == 'plyta_meblowa'"/>
+                        </group>
+                        <group string="Właściwości materiału">
+                            <field name="plate_material"/>
+                            <field name="plate_color"/>
+                            <field name="plate_surface"/>
+                        </group>
+                    </group>
+                </page>
+
+                <!-- Karta dla Obrzeży -->
+                <page string="Obrzeże" invisible="furniture_type != 'obrzeze'">
+                    <group>
+                        <group string="Wymiary obrzeża">
+                            <field name="edge_length" required="furniture_type == 'obrzeze'"/>
+                            <field name="edge_width" required="furniture_type == 'obrzeze'"/>
+                            <field name="edge_thickness" required="furniture_type == 'obrzeze'"/>
+                        </group>
+                        <group string="Właściwości materiału">
+                            <field name="edge_material"/>
+                            <field name="edge_color"/>
+                        </group>
+                    </group>
+                </page>
+
+                <!-- Karta dla Okuć -->
+                <page string="Okucia" invisible="furniture_type != 'okucia'">
+                    <group>
+                        <group string="Typ okucia">
+                            <field name="hardware_type" required="furniture_type == 'okucia'"/>
+                            <field name="hardware_material"/>
+                            <field name="hardware_finish"/>
+                        </group>
+                        <group string="Parametry techniczne">
+                            <field name="hardware_load_capacity"/>
+                        </group>
+                    </group>
+                </page>
+
+                <!-- Karta dla Kartonów -->
+                <page string="Kartony" invisible="furniture_type != 'kartony'">
+                    <group>
+                        <group string="Wymiary kartonu">
+                            <field name="carton_length" required="furniture_type == 'kartony'"/>
+                            <field name="carton_width" required="furniture_type == 'kartony'"/>
+                            <field name="carton_height" required="furniture_type == 'kartony'"/>
+                        </group>
+                        <group string="Właściwości">
+                            <field name="carton_type"/>
+                            <field name="carton_strength"/>
+                        </group>
+                    </group>
+                </page>
+
+                <!-- Karta dla Tkanin -->
+                <page string="Tkaniny" invisible="furniture_type != 'tkaniny'">
+                    <group>
+                        <group string="Wymiary i skład">
+                            <field name="fabric_width" required="furniture_type == 'tkaniny'"/>
+                            <field name="fabric_composition"/>
+                            <field name="fabric_weight"/>
+                        </group>
+                        <group string="Wzór i pielęgnacja">
+                            <field name="fabric_pattern"/>
+                            <field name="fabric_care"/>
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <!-- Widok drzewa z dodatkową kolumną typu meblarskiego -->
+    <record id="product_template_tree_furniture" model="ir.ui.view">
+        <field name="name">product.template.tree.furniture</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="categ_id" position="after">
+                <field name="furniture_type"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Widok wyszukiwania usunięty - używamy standardowego widoku produktów -->
+
+    <!-- Akcje menu -->
+    
+    <!-- Główna akcja dla wszystkich produktów meblarskich -->
+    <record id="action_product_furniture_all" model="ir.actions.act_window">
+        <field name="name">Produkty meblowe</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('furniture_type', '!=', False)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Utwórz pierwszy produkt meblarski
+            </p>
+            <p>
+                Produkty meblarskie to formatki, płyty, obrzeża, okucia, kartony i tkaniny
+                używane w produkcji mebli.
+            </p>
+        </field>
+    </record>
+    <record id="action_product_formatki" model="ir.actions.act_window">
+        <field name="name">Formatki</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('furniture_type', '=', 'formatka')]</field>
+        <field name="context">{'default_furniture_type': 'formatka'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Utwórz pierwszą formatkę
+            </p>
+            <p>
+                Formatki to elementy meblarskie wycinane z płyt według określonych wymiarów
+                z możliwością aplikacji obrzeży na krawędziach.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_product_plyty" model="ir.actions.act_window">
+        <field name="name">Płyty meblowe</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('furniture_type', '=', 'plyta_meblowa')]</field>
+        <field name="context">{'default_furniture_type': 'plyta_meblowa'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Utwórz pierwszą płytę meblową
+            </p>
+            <p>
+                Płyty meblowe to podstawowy surowiec używany do produkcji mebli.
+                Definiuj wymiary, materiał i właściwości powierzchni.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_product_obrzeza" model="ir.actions.act_window">
+        <field name="name">Obrzeża</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('furniture_type', '=', 'obrzeze')]</field>
+        <field name="context">{'default_furniture_type': 'obrzeze'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Utwórz pierwsze obrzeże
+            </p>
+            <p>
+                Obrzeża służą do wykańczania krawędzi elementów meblarskich.
+                Definiuj długość rolki, szerokość, grubość i materiał.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_product_okucia" model="ir.actions.act_window">
+        <field name="name">Okucia</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('furniture_type', '=', 'okucia')]</field>
+        <field name="context">{'default_furniture_type': 'okucia'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Utwórz pierwsze okucie
+            </p>
+            <p>
+                Okucia to elementy funkcjonalne mebli: zawiasy, prowadnice, uchwyty itp.
+                Definiuj typ, materiał, wykończenie i nośność.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_furniture_products_root" 
+              name="Produkty meblowe" 
+              action="action_product_furniture_all"
+              parent="stock.menu_stock_root" 
+              sequence="15"/>
+
+    <menuitem id="menu_furniture_formatki" 
+              action="action_product_formatki" 
+              parent="menu_furniture_products_root" 
+              sequence="10"/>
+
+    <menuitem id="menu_furniture_plyty" 
+              action="action_product_plyty" 
+              parent="menu_furniture_products_root" 
+              sequence="20"/>
+
+    <menuitem id="menu_furniture_obrzeza" 
+              action="action_product_obrzeza" 
+              parent="menu_furniture_products_root" 
+              sequence="30"/>
+
+    <menuitem id="menu_furniture_okucia" 
+              action="action_product_okucia" 
+              parent="menu_furniture_products_root" 
+              sequence="40"/>
+
+</odoo>

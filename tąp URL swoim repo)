@@ -1,0 +1,46 @@
+[33mcommit 2085436fbdf76c0936562132a90f44a630a36529[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: marlowX <biuro@alpmeb.pl>
+Date:   Fri Jun 13 16:44:04 2025 +0200
+
+    🚀 Initial commit: Alpma Production Base Module
+    
+    ✅ Podstawowy moduł dla systemu produkcji mebli Alpma
+    ✅ Rozszerzenie product.template z polami meblowymi
+    ✅ Typy meblarskie (formatka, produkt, płyta, okucia, obrzeża)
+    ✅ Automatyczne generowanie nazw formatek (cz1, cz2, wymiary, kolor)
+    ✅ Pola wymiarów dostosowane do typu (formatki: długość/szerokość, meble: +wysokość)
+    ✅ Grubość formatki pobierana z płyty bazowej
+    ✅ Kolor formatki pobierany z płyty bazowej
+    ✅ 4 pola obrzeży (ok1-ok4) z przyciskiem szybkiego przypisania
+    ✅ Parametry obrzeży (szerokość, grubość, długość rolki)
+    ✅ Seria produktowa jako kategorie
+    ✅ Obliczenia: powierzchnia, objętość, wymiary display
+    ✅ Widoki dynamiczne dostosowane do typu meblarskiego
+    ✅ Powiązanie formatki z produktem gotowym (SKU)
+    ✅ Delikatne style CSS dla lepszego UX
+    
+    📁 Struktura:
+    - models/product_template.py - główny model
+    - models/product_category.py - rozszerzenie kategorii
+    - views/product_template_views.xml - widoki produktów
+    - views/product_category_views.xml - widoki kategorii
+    - static/src/css/alpma_styles.css - style CSS
+    - security/ir.model.access.csv - uprawnienia
+    
+    🎯 Gotowy do SPRINT 2: alpma_work_orders
+
+custom-addons/alpma_production_base/.gitignore
+custom-addons/alpma_production_base/__init__.py
+custom-addons/alpma_production_base/__manifest__.py
+custom-addons/alpma_production_base/demo/product_demo.xml
+custom-addons/alpma_production_base/models/__init__.py
+custom-addons/alpma_production_base/models/product_category.py
+custom-addons/alpma_production_base/models/product_template.py
+custom-addons/alpma_production_base/odoo
+custom-addons/alpma_production_base/security/ir.model.access.csv
+custom-addons/alpma_production_base/static/src/css/alpma_styles.css
+custom-addons/alpma_production_base/stop
+custom-addons/alpma_production_base/systemctl
+custom-addons/alpma_production_base/views/alpma_menu.xml
+custom-addons/alpma_production_base/views/product_category_views.xml
+custom-addons/alpma_production_base/views/product_template_views.xml

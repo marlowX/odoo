@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Minimalistyczny widok BOM z polami obliczeniowymi -->
+    <record id="mrp_bom_form_furniture" model="ir.ui.view">
+        <field name="name">mrp.bom.form.furniture</field>
+        <field name="model">mrp.bom</field>
+        <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+        <field name="arch" type="xml">
+            <field name="product_qty" position="after">
+                <field name="is_furniture_bom" readonly="1"/>
+                <field name="total_plate_area" readonly="1"/>
+                <field name="total_edge_length" readonly="1"/>
+                <field name="estimated_cost" readonly="1"/>
+                <field name="currency_id" invisible="1"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

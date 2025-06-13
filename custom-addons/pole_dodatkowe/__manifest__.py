@@ -16,8 +16,8 @@ Funkcjonalności:
 * Kompatybilne z Odoo 17.0
 * Minimalne rozszerzenie bez konfliktów XPath
     """,
-    'author': 'Twoja Firma',
-    'website': 'https://www.twojastrona.pl',
+    'author': 'alpma',
+    'website': 'alpmeb.pl',
     'license': 'LGPL-3',
     'depends': ['product'],
     'data': [
