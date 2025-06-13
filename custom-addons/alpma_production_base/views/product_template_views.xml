@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Rozszerzenie formularza produktu - dodanie pól Alpma -->
+        <record id="product_template_form_view_alpma" model="ir.ui.view">
+            <field name="name">product.template.form.alpma</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="arch" type="xml">
+                
+                <!-- Dodaj zakładkę Alpma -->
+                <xpath expr="//notebook" position="inside">
+                    <page string="Alpma" name="alpma_tab">
+                        
+                        <!-- Sekcja dla Formatek -->
+                        <group string="Parametry formatki" invisible="typ_meblarski != 'formatka'">
+                            <group string="Części nazwy">
+                                <field name="cz1"  placeholder="BOK-L" class="o_input_border"/>
+                                <field name="cz2" required="typ_meblarski == 'formatka'" class="o_input_border"/>
+                            </group>
+                            <group string="Rozmiar standardowy">
+                                <field name="rozmiar_dlugosc"/>
+                                <field name="rozmiar_szerokosc"/>
+                            </group>
+                        </group>
+
+                        <group string="Wymiary formatki" invisible="typ_meblarski != 'formatka'">
+                            <group>
+                                <field name="dlugosc_cm" required="typ_meblarski == 'formatka'" class="o_input_border"/>
+                                <field name="szerokosc_cm" required="typ_meblarski == 'formatka'" class="o_input_border"/>
+                                <field name="plyta_bazowa"/>
+                                <field name="grubosc_mm" readonly="1"/>
+                            </group>
+                            <group>
+                                <field name="kolor_manual" placeholder="BIAŁY"/>
+                                <field name="kolor_material" readonly="1"/>
+                                <field name="powierzchnia_m2" readonly="1"/>
+                                <field name="wymiary_display" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <group string="Obrzeża formatki" invisible="typ_meblarski != 'formatka'">
+                            <group>
+                                <field name="ok1_obrzeze" string="ok1 - Długość góra"/>
+                                <field name="ok2_obrzeze" string="ok2 - Szerokość prawa"/>
+                            </group>
+                            <group>
+                                <field name="ok3_obrzeze" string="ok3 - Długość dół"/>
+                                <field name="ok4_obrzeze" string="ok4 - Szerokość lewa"/>
+
+                                <field name="wszystkie_obrzeza" placeholder="Wybierz..."/> <button name="action_assign_all_edges" string="→4" type="object" class="btn-sm" title="Przypisz do wszystkich"/>
+
+                            <separator/>
+                            <group>
+                            </group>
+
+                            </group>
+                            <group>
+
+                        <separator/>
+                            </group>
+                        </group>
+
+                        <!-- Sekcja dla Produktów/Mebli -->
+                        <group string="Wymiary mebla" invisible="typ_meblarski not in ['produkt_pojedynczy', 'zestaw']">
+                            <group>
+                                <field name="dlugosc_cm" string="Długość (cm)" required="typ_meblarski in ['produkt_pojedynczy', 'zestaw']"/>
+                                <field name="szerokosc_cm" string="Szerokość (cm)" required="typ_meblarski in ['produkt_pojedynczy', 'zestaw']"/>
+                                <field name="wysokosc_cm" required="typ_meblarski in ['produkt_pojedynczy', 'zestaw']"/>
+                            </group>
+                            <group>
+                                <field name="kolor_manual"/>
+                                <field name="objetosc_m3" readonly="1"/>
+                                <field name="wymiary_display" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <!-- Sekcja dla Płyt -->
+                        <group string="Parametry płyty" invisible="typ_meblarski != 'plyta'">
+                            <group>
+                                <field name="dlugosc_cm" string="Długość płyty (cm)" required="typ_meblarski == 'plyta'"/>
+                                <field name="szerokosc_cm" string="Szerokość płyty (cm)" required="typ_meblarski == 'plyta'"/>
+                                <field name="grubosc_plyty_mm" required="typ_meblarski == 'plyta'"/>
+                            </group>
+                            <group>
+                                <field name="kolor_manual"/>
+                                <field name="powierzchnia_m2" readonly="1"/>
+                                <field name="wymiary_display" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <!-- Sekcja dla Okuć -->
+                        <group string="Parametry okucia" invisible="typ_meblarski != 'okucia'">
+                            <group>
+                                <field name="dlugosc_okucia_mm"/>
+                                <field name="nosnosc_kg"/>
+                            </group>
+                            <group>
+                                <field name="wymiary_display" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <!-- Sekcja dla Obrzeży -->
+                        <group string="Parametry obrzeża" invisible="typ_meblarski != 'obrzeza'">
+                            <group>
+                                <field name="szerokosc_obrzeza_mm" placeholder="22"/>
+                                <field name="grubosc_obrzeza_mm" placeholder="0.8"/>
+                                <field name="dlugosc_rolki_m" placeholder="50"/>
+                            </group>
+                            <group>
+                                <field name="kolor_manual"/>
+                                <field name="wymiary_display" readonly="1"/>
+                            </group>
+                        </group>
+
+                        <!-- Podstawowe informacje -->
+                        <group>
+                            <group string="Podstawowe informacje Alpma">
+                                <field name="is_alpma_product"/>
+                                <field name="typ_meblarski"/>
+                                <field name="seria_produktowa" domain="[('is_alpma_series', '=', True)]"/>
+                                <field name="grupa_produkcyjna"/>
+                            </group>
+                        </group>
+
+                    </page>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

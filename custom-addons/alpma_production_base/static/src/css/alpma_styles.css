@@ -1,0 +1,64 @@
+/* Alpma Production Base - Delikatne nowoczesne style */
+
+/* Delikatne ramki dla pól w zakładce Alpma */
+.tab-pane[name="alpma_tab"] .o_field_widget input,
+.tab-pane[name="alpma_tab"] .o_field_widget select,
+.tab-pane[name="alpma_tab"] .o_field_widget .o_input {
+    border: 1px solid #e1e5e9 !important;
+    border-radius: 3px !important;
+    padding: 6px 10px !important;
+    background-color: #fff !important;
+    transition: all 0.2s ease !important;
+    font-size: 13px !important;
+}
+
+/* Hover - subtelny efekt */
+.tab-pane[name="alpma_tab"] .o_field_widget input:hover,
+.tab-pane[name="alpma_tab"] .o_field_widget select:hover {
+    border-color: #c6d0da !important;
+    background-color: #fcfcfd !important;
+}
+
+/* Focus - delikatny niebieski */
+.tab-pane[name="alpma_tab"] .o_field_widget input:focus,
+.tab-pane[name="alpma_tab"] .o_field_widget select:focus {
+    border-color: #8bb6d9 !important;
+    background-color: #fff !important;
+    box-shadow: 0 0 0 1px rgba(139, 182, 217, 0.2) !important;
+    outline: none !important;
+}
+
+/* Many2one fields */
+.tab-pane[name="alpma_tab"] .o_field_many2one .o_input_dropdown {
+    border: 1px solid #e1e5e9 !important;
+    border-radius: 3px !important;
+    background-color: #fff !important;
+}
+
+/* Readonly fields - jeszcze delikatniejsze */
+.tab-pane[name="alpma_tab"] .o_field_widget.o_readonly input,
+.tab-pane[name="alpma_tab"] .o_field_widget.o_readonly .o_input {
+    border: 1px solid #f1f3f5 !important;
+    background-color: #f8f9fa !important;
+    color: #6c757d !important;
+}
+
+/* Grupa styling - minimalistyczny */
+.tab-pane[name="alpma_tab"] .o_group {
+    border: none !important;
+    background: transparent !important;
+    padding: 8px 0 !important;
+}
+
+/* Separatory */
+.tab-pane[name="alpma_tab"] .o_horizontal_separator {
+    border-color: #e9ecef !important;
+    margin: 12px 0 !important;
+}
+
+/* Przyciski - kompaktowe */
+.tab-pane[name="alpma_tab"] .btn {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+    border-radius: 3px !important;
+}

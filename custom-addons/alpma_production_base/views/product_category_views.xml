@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Rozszerzenie formularza kategorii produktów -->
+        <record id="product_category_form_view_alpma" model="ir.ui.view">
+            <field name="name">product.category.form.alpma</field>
+            <field name="model">product.category</field>
+            <field name="inherit_id" ref="product.product_category_form_view"/>
+            <field name="arch" type="xml">
+                
+                <!-- Dodaj pola Alpma po nazwie -->
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="is_alpma_series"/>
+                    <field name="seria_kod"/>
+                </xpath>
+
+                <!-- Dodaj pola w grupie -->
+                <xpath expr="//field[@name='parent_id']" position="after">
+                    <field name="seria_opis"/>
+                    <field name="dostepne_kolory"/>
+                    <field name="standardowe_szerokosci"/>
+                    <field name="standardowe_wysokosci"/>
+                    <field name="liczba_produktow" readonly="1"/>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>
