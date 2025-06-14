@@ -15,6 +15,7 @@ def _compute_grubosc(self):
             record.grubosc_mm = 0.0
 
 
+@api.depends("plyta_bazowa", "plyta_bazowa.name", "plyta_bazowa.kolor_manual", "kolor_manual")
 def _compute_kolor_material(self):
     """Oblicza kolor na podstawie płyty bazowej lub ręcznego wprowadzenia"""
     for record in self:
@@ -110,40 +111,44 @@ def _compute_wymiary_display(self):
 
 
 def _generate_nazwa_formatki(self):
-    """Generuje nazwę formatki według formuły z Airtable"""
+    """Generuje nazwę formatki według formuły z Airtable - POPRAWIONY KOLOR"""
     self.ensure_one()
     
-    if not self.cz1:
+    # Wymagane nowe pole typu formatki
+    if not self.parametr_typ_formatki or not self.parametr_typ_formatki.code:
         return ""
-        
-    nazwa_parts = [self.cz1]
     
-    # Dodaj rozmiar jeśli jest
-    if self.rozmiar_dlugosc and self.rozmiar_szerokosc:
-        nazwa_parts.append(f"{self.rozmiar_dlugosc:g}x{self.rozmiar_szerokosc:g}")
-    elif self.rozmiar_dlugosc:
+    nazwa_parts = [self.parametr_typ_formatki.code]
+    
+    # Dodaj rozmiar jeśli jest (tylko długość, bo szerokość = 0)
+    if self.rozmiar_dlugosc and self.rozmiar_dlugosc > 0:
         nazwa_parts.append(f"{self.rozmiar_dlugosc:g}")
-    elif self.rozmiar_szerokosc:
-        nazwa_parts.append(f"{self.rozmiar_szerokosc:g}")
-        
-    # Dodaj cz2 jeśli jest
-    if self.cz2:
-        nazwa_parts.append(self.cz2)
-        
+    
+    # Dodaj typ szafki
+    if self.parametr_typ_szafki and self.parametr_typ_szafki.code:
+        nazwa_parts.append(self.parametr_typ_szafki.code)
+    
     # Dodaj wymiary rzeczywiste
-    if self.dlugosc_cm:
-        if self.szerokosc_cm:
-            nazwa_parts.append(f"{self.dlugosc_cm:g}x{self.szerokosc_cm:g}")
+    if self.dlugosc_cm and self.szerokosc_cm:
+        nazwa_parts.append(f"{self.dlugosc_cm:g}x{self.szerokosc_cm:g}")
+    
+    # BEZPOŚREDNI KOLOR Z PŁYTY
+    kolor = ""
+    if self.plyta_bazowa and self.plyta_bazowa.name:
+        # Wyciągnij kolor z nazwy płyty bazowej
+        plyta_nazwa = self.plyta_bazowa.name
+        if "_" in plyta_nazwa:
+            kolor = plyta_nazwa.split("_")[-1]  # "18_LANCELOT" -> "LANCELOT"
         else:
-            nazwa_parts.append(f"{self.dlugosc_cm:g}")
-            
-    # Dodaj kolor
-    if self.kolor_material:
-        nazwa_parts.append(self.kolor_material)
-        
+            kolor = plyta_nazwa
+    elif self.kolor_manual:
+        kolor = self.kolor_manual
+    
+    if kolor:
+        nazwa_parts.append(kolor)
+    
     return "-".join(nazwa_parts)
-
-
+    return "-".join(nazwa_parts)
 def _compute_objetosc(self):
     """Oblicza objętość w m³ dla produktów meblarskich"""
     for record in self:

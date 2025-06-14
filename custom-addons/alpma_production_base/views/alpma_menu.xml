@@ -38,5 +38,57 @@
                   action="action_alpma_cabinet_param_drzwi" 
                   sequence="30"/>
 
+        <!-- NOWE: Typy formatek -->
+        <menuitem id="menu_alpma_cabinet_param_typ_formatki"
+                 name="Typy formatek"
+                 parent="menu_alpma_cabinet_params"
+                 action="action_alpma_cabinet_param_typ_formatki"
+                 sequence="40"/>
+
+        <!-- NOWE: Typy szafek -->
+        <menuitem id="menu_alpma_cabinet_param_typ_szafki"
+                 name="Typy szafek"
+                 parent="menu_alpma_cabinet_params"
+                 action="action_alpma_cabinet_param_typ_szafki"
+                 sequence="50"/>
+
+        <!-- Menu w Inventory (pod Configuration) -->
+        <menuitem id="menu_alpma_params_in_inventory" 
+                  name="Parametry szafek Alpma" 
+                  parent="stock.menu_stock_config_settings" 
+                  sequence="60"/>
+        
+        <menuitem id="menu_alpma_param_nogi_inv" 
+                  name="Parametry nóg" 
+                  parent="menu_alpma_params_in_inventory" 
+                  action="action_alpma_cabinet_param_nogi" 
+                  sequence="10"/>
+        
+        <menuitem id="menu_alpma_param_uchyt_inv" 
+                  name="Parametry uchwytów" 
+                  parent="menu_alpma_params_in_inventory" 
+                  action="action_alpma_cabinet_param_uchyt" 
+                  sequence="20"/>
+        
+        <menuitem id="menu_alpma_param_drzwi_inv" 
+                  name="Parametry drzwi" 
+                  parent="menu_alpma_params_in_inventory" 
+                  action="action_alpma_cabinet_param_drzwi" 
+                  sequence="30"/>
+
+        <!-- NOWE: Typy formatek w Inventory -->
+        <menuitem id="menu_alpma_cabinet_param_typ_formatki_inv"
+                 name="Typy formatek"
+                 parent="menu_alpma_params_in_inventory"
+                 action="action_alpma_cabinet_param_typ_formatki"
+                 sequence="40"/>
+
+        <!-- NOWE: Typy szafek w Inventory -->
+        <menuitem id="menu_alpma_cabinet_param_typ_szafki_inv"
+                 name="Typy szafek"
+                 parent="menu_alpma_params_in_inventory"
+                 action="action_alpma_cabinet_param_typ_szafki"
+                 sequence="50"/>
+
     </data>
 </odoo>

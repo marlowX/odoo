@@ -37,11 +37,15 @@ Wymagania:
         # Data  
         'data/product_category_data.xml',
         'data/alpma_cabinet_params_data.xml',
+        'data/alpma_cabinet_param_typ_formatki_data.xml',
+        'data/alpma_cabinet_param_typ_szafki_data.xml',
         
         # Views
         'views/product_template_views.xml',
         'views/product_category_views.xml',
         'views/alpma_cabinet_params_views.xml',
+        'views/alpma_cabinet_param_typ_formatki_views.xml',
+        'views/alpma_cabinet_param_typ_szafki_views.xml',
         
         # Menu
         'views/alpma_menu.xml',

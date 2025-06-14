@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Lista typów szafek -->
+        <record id="view_alpma_cabinet_param_typ_szafki_tree" model="ir.ui.view">
+            <field name="name">alpma.cabinet.param.typ_szafki.tree</field>
+            <field name="model">alpma.cabinet.param.typ_szafki</field>
+            <field name="arch" type="xml">
+                <tree string="Typy szafek" editable="bottom" default_order="sequence">
+                    <field name="sequence" widget="handle"/>
+                    <field name="code"/>
+                    <field name="name"/>
+                    <field name="description"/>
+                    <field name="active"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Formularz typu szafki -->
+        <record id="view_alpma_cabinet_param_typ_szafki_form" model="ir.ui.view">
+            <field name="name">alpma.cabinet.param.typ_szafki.form</field>
+            <field name="model">alpma.cabinet.param.typ_szafki</field>
+            <field name="arch" type="xml">
+                <form string="Typ szafki">
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name"/>
+                                <field name="code"/>
+                                <field name="sequence"/>
+                            </group>
+                            <group>
+                                <field name="active"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="description" placeholder="Opis typu szafki..."/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Akcja -->
+        <record id="action_alpma_cabinet_param_typ_szafki" model="ir.actions.act_window">
+            <field name="name">Typy szafek</field>
+            <field name="res_model">alpma.cabinet.param.typ_szafki</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Dodaj nowy typ szafki
+                </p>
+                <p>
+                    Typy szafek definiują serie/rodzaje szafek 
+                    (VB, TRES, ALTUS, SUPRA)
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

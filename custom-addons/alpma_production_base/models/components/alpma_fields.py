@@ -250,3 +250,16 @@ show_sku_field = fields.Boolean(
     compute='_compute_show_sku',
     help="Czy pokazać pole SKU dla tego typu produktu"
 )
+
+# Nowe parametry - typ formatki i typ szafki
+parametr_typ_formatki = fields.Many2one(
+    'alpma.cabinet.param.typ_formatki',
+    string='Typ formatki',
+    help='Typ formatki (BOK-L, WG, DRZWI, etc.)'
+)
+
+parametr_typ_szafki = fields.Many2one(
+    'alpma.cabinet.param.typ_szafki', 
+    string='Typ szafki',
+    help='Typ/seria szafki (VB, TRES, ALTUS, SUPRA)'
+)

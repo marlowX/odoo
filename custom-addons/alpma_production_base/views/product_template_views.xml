@@ -15,8 +15,8 @@
                         <!-- Sekcja dla Formatek -->
                         <group string="Parametry formatki" invisible="typ_meblarski != 'formatka'">
                             <group string="Części nazwy">
-                                <field name="cz1" placeholder="BOK-L"/>
-                                <field name="cz2" required="typ_meblarski == 'formatka'"/>
+                                <field name="parametr_typ_formatki"/>
+                                <field name="parametr_typ_szafki"/>
                                 <field name="produkt_powiazany" string="SKU produktu" placeholder="Wybierz produkt gotowy..."/>
                             </group>
                             <group string="Rozmiar standardowy">
